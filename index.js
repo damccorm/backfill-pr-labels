@@ -140,9 +140,8 @@ async function getChangedFiles(client, owner, repo, prNumber) {
     return changedFiles;
 }
 
-async function processPr(client, owner, repo, configurationPath, pullRequest, whatIfMode) {
+async function processPr(client, owner, repo, configurationPath, pullRequest, labelGlobs, whatIfMode) {
     const changedFiles = await getChangedFiles(client, owner, repo, pullRequest.number);
-    const labelGlobs = await getLabelGlobs(client, owner, repo, configurationPath);
 
     const labels = [];
     for (const [label, globs] of labelGlobs.entries()) {
@@ -164,6 +163,7 @@ async function processPr(client, owner, repo, configurationPath, pullRequest, wh
 
 async function run(owner, repo, githubToken, configurationPath, whatIfMode){
     const client = new Octokit({auth: githubToken});
+    const labelGlobs = await getLabelGlobs(client, owner, repo, configurationPath);
 
     pulls = []
     page = 1
@@ -182,7 +182,7 @@ async function run(owner, repo, githubToken, configurationPath, whatIfMode){
             retries = 3
             while (i < pulls.length) {
                 try {
-                    processPr(client, owner, repo, configurationPath, pulls[i], whatIfMode)
+                    await processPr(client, owner, repo, configurationPath, pulls[i], labelGlobs, whatIfMode)
                     i += 1
                 }
                 catch(err) {
@@ -199,7 +199,8 @@ async function run(owner, repo, githubToken, configurationPath, whatIfMode){
             }
             page += 1
         }
-        await new Promise(r => setTimeout(r, 1000)); // Sleep for a second between pages
+        console.log("Sleeping for 4 minutes to avoid rate limiting")
+        await new Promise(r => setTimeout(r, 240000)); // Sleep for 4 minutes between pages
     }
 }
 

@@ -1,0 +1,24 @@
+{
+  "name": "backfill-pr-labels",
+  "version": "1.0.0",
+  "description": "Repo to backfill pr labels for a repo based on the same config as actions/labeler",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/damccorm/backfill-pr-labels.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/damccorm/backfill-pr-labels/issues"
+  },
+  "homepage": "https://github.com/damccorm/backfill-pr-labels#readme",
+  "dependencies": {
+    "@octokit/rest": "^18.12.0",
+    "js-yaml": "^4.1.0",
+    "minimatch": "^3.0.4"
+  }
+}

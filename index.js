@@ -140,7 +140,7 @@ async function getChangedFiles(client, owner, repo, prNumber) {
     return changedFiles;
 }
 
-async function processPr(client, owner, repo, configurationPath, pullRequest) {
+async function processPr(client, owner, repo, configurationPath, pullRequest, whatIfMode) {
     const changedFiles = await getChangedFiles(client, owner, repo, pullRequest.number);
     const labelGlobs = await getLabelGlobs(client, owner, repo, configurationPath);
 
@@ -152,11 +152,17 @@ async function processPr(client, owner, repo, configurationPath, pullRequest) {
     }
 
     if (labels.length > 0) {
-        await addLabels(client, owner, repo, pullRequest.number, labels);
+        if (!whatIfMode) {
+            await addLabels(client, owner, repo, pullRequest.number, labels);
+        }
+        else {
+            console.log(`Would have added the following labels to https://github.com/${owner}/${repo}/pull/${pullRequest.number}`);
+            console.log(labels)
+        }
     }
 }
 
-async function run(owner, repo, githubToken, configurationPath){
+async function run(owner, repo, githubToken, configurationPath, whatIfMode){
     const client = new Octokit({auth: githubToken});
 
     pulls = []
@@ -176,7 +182,7 @@ async function run(owner, repo, githubToken, configurationPath){
             retries = 3
             while (i < pulls.length) {
                 try {
-                    processPr(client, owner, repo, configurationPath, pulls[i])
+                    processPr(client, owner, repo, configurationPath, pulls[i], whatIfMode)
                     i += 1
                 }
                 catch(err) {
@@ -197,8 +203,15 @@ async function run(owner, repo, githubToken, configurationPath){
     }
 }
 
-const myArgs = process.argv.slice(2);
+function assertArgs(args) {
+    if (!args[3]) {
+        throw new Error("Not enough args specified. Must specify at least 4 args (node index.js <owner> <repo> <token> <path to config file in your repo at master> <optionally - true/false for what if mode>)");
+    }
+}
 
-// Expecting args in order of node index.js owner repo token pathToConfigFile
-// Example: node index.js damccorm backfill-pr-labels <your token in plain text> .github/autolabeler.yml
-run(myArgs[0], myArgs[1], myArgs[2], myArgs[3]);
+const args = process.argv.slice(2);
+assertArgs(args);
+
+// Expecting args in order of node index.js <owner> <repo> <token> <path to config file in your repo at master> <optionally - true/false for what if mode>
+// Example: node index.js damccorm backfill-pr-labels <your token in plain text> .github/autolabeler.yml true
+run(args[0], args[1], args[2], args[3], args[4]);

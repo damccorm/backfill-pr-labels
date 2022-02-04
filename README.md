@@ -5,7 +5,7 @@ To run:
 
 ```
 npm install
-node index.js <owner> <repo> <github token> <path to config> # Example: node index.js damccorm backfill-pr-labels <your token in plain text> .github/autolabeler.yml
+node index.js <owner> <repo> <token> <path to config file in your repo at master> <optionally - true/false for what if mode> # Example: node index.js damccorm backfill-pr-labels <your token in plain text> .github/autolabeler.yml true
 ```
 
 
